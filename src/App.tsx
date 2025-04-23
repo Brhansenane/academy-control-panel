@@ -11,6 +11,8 @@ import Students from "@/pages/Students";
 import StudentDetails from "@/pages/StudentDetails";
 import Teachers from "@/pages/Teachers";
 import TeacherDetails from "@/pages/TeacherDetails";
+import Schedule from "@/pages/Schedule";
+import Attendance from "@/pages/Attendance";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
               <Route path="/students/:id" element={<StudentDetails />} />
               <Route path="/teachers" element={<Teachers />} />
               <Route path="/teachers/:id" element={<TeacherDetails />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/attendance" element={<Attendance />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
