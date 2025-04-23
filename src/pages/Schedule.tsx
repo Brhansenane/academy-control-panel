@@ -1,13 +1,13 @@
 
 import React, { useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
+import { format } from "date-fns";
+import { parse } from "date-fns";
+import { startOfWeek } from "date-fns";
+import { getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Plus, Filter, Download } from "lucide-react";
-import arSA from 'date-fns/locale/ar-SA';
+import { arSA } from 'date-fns/locale/ar-SA';
 
 const locales = {
   'ar-SA': arSA,
