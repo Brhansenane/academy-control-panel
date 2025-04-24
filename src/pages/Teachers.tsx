@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { AddTeacherForm } from "@/components/forms/AddTeacherForm";
 import { 
   ChevronRight, 
   Download, 
@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Mock data for teachers
 const TEACHERS_DATA = [
   {
     id: 1,
@@ -71,7 +70,6 @@ const TeacherCard = ({ teacher }: { teacher: Teacher }) => {
 
   return (
     <div className="glass-card card-hover p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
-      {/* Teacher info */}
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-full overflow-hidden border">
           <img 
@@ -86,7 +84,6 @@ const TeacherCard = ({ teacher }: { teacher: Teacher }) => {
         </div>
       </div>
 
-      {/* Teacher stats - Desktop */}
       <div className="hidden md:flex items-center gap-6">
         <div className="text-center">
           <p className="text-xs text-muted-foreground">الفصول</p>
@@ -102,7 +99,6 @@ const TeacherCard = ({ teacher }: { teacher: Teacher }) => {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2 mr-auto md:mr-0">
         <Link 
           to={`/teachers/${teacher.id}`} 
@@ -142,6 +138,7 @@ const TeacherCard = ({ teacher }: { teacher: Teacher }) => {
 export function Teachers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("الكل");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const filteredTeachers = TEACHERS_DATA.filter(teacher => {
     const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -159,12 +156,16 @@ export function Teachers() {
           <h1 className="text-3xl font-bold">إدارة المدرسين</h1>
           <p className="text-muted-foreground">استعراض بيانات المدرسين وإدارتها</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          className="btn-primary flex items-center gap-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus size={16} /> إضافة مدرس جديد
         </button>
       </div>
 
-      {/* Filters */}
+      <AddTeacherForm open={showAddForm} onOpenChange={setShowAddForm} />
+      
       <div className="glass-card p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
@@ -198,7 +199,6 @@ export function Teachers() {
         </div>
       </div>
 
-      {/* Teacher list */}
       <div className="space-y-4">
         {filteredTeachers.length > 0 ? (
           filteredTeachers.map(teacher => (

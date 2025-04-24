@@ -1,12 +1,13 @@
-
 import React, { useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Filter, Download } from "lucide-react";
+import { AddClassForm } from "@/components/forms/AddClassForm";
+import { dateFnsLocalizer } from "react-big-calendar";
 import { format } from "date-fns";
 import { parse } from "date-fns";
 import { startOfWeek } from "date-fns";
 import { getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Plus, Filter, Download } from "lucide-react";
 import { arSA } from 'date-fns/locale/ar-SA';
 
 const locales = {
@@ -48,6 +49,7 @@ const events = [
 
 export default function Schedule() {
   const [view, setView] = useState("week");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   return (
     <div className="animate-fade-in space-y-6" dir="rtl">
@@ -56,11 +58,16 @@ export default function Schedule() {
           <h1 className="text-3xl font-bold">الجدول الدراسي</h1>
           <p className="text-muted-foreground">إدارة وتنظيم الحصص الدراسية</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          className="btn-primary flex items-center gap-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus size={16} /> إضافة حصة جديدة
         </button>
       </div>
 
+      <AddClassForm open={showAddForm} onOpenChange={setShowAddForm} />
+      
       <div className="glass-card p-4 flex flex-wrap gap-4 justify-between items-center">
         <div className="flex gap-4">
           <button className="flex items-center gap-2 border rounded-md py-2 px-3 hover:bg-accent">

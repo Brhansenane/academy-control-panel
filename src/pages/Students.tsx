@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -12,6 +11,7 @@ import {
   Trash2, 
   User 
 } from "lucide-react";
+import { AddStudentForm } from "@/components/forms/AddStudentForm";
 
 // Mock data for students
 const STUDENTS_DATA = [
@@ -192,6 +192,7 @@ const StudentCard = ({ student }: { student: Student }) => {
 export function Students() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("الكل");
+  const [showAddForm, setShowAddForm] = useState(false);
   
   // Filter students based on search and filter criteria
   const filteredStudents = STUDENTS_DATA.filter(student => {
@@ -202,7 +203,7 @@ export function Students() {
   });
   
   // Grade options
-  const gradeOptions = ["الكل", "الصف الثامن", "الصف التاسع", "الصف العاشر"];
+  const gradeOptions = ["الكل", "الصف الثامن", "الصف التاسع", "الصف العاش��"];
 
   return (
     <div className="animate-fade-in" dir="rtl">
@@ -211,10 +212,15 @@ export function Students() {
           <h1 className="text-3xl font-bold">إدارة الطلاب</h1>
           <p className="text-muted-foreground">استعراض بيانات الطلاب وإدارتها</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          className="btn-primary flex items-center gap-2"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus size={16} /> إضافة طالب جديد
         </button>
       </div>
+      
+      <AddStudentForm open={showAddForm} onOpenChange={setShowAddForm} />
       
       {/* Filters */}
       <div className="glass-card p-4 mb-6">
