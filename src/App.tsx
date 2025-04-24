@@ -13,6 +13,8 @@ import Teachers from "@/pages/Teachers";
 import TeacherDetails from "@/pages/TeacherDetails";
 import Schedule from "@/pages/Schedule";
 import Attendance from "@/pages/Attendance";
+import Grades from "@/pages/Grades";
+import Messages from "@/pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
               <Route path="/teachers/:id" element={<TeacherDetails />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/attendance" element={<Attendance />} />
+              <Route path="/grades" element={<Grades />} />
+              <Route path="/messages" element={<Messages />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
