@@ -15,6 +15,7 @@ import Schedule from "@/pages/Schedule";
 import Attendance from "@/pages/Attendance";
 import Grades from "@/pages/Grades";
 import Messages from "@/pages/Messages";
+import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/grades" element={<Grades />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
