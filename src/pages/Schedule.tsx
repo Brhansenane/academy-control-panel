@@ -1,12 +1,12 @@
-
 import React, { useState } from "react";
 import { Calendar as BigCalendar } from "react-big-calendar";
+import { dateFnsLocalizer } from 'react-big-calendar'; // Remove 'import type'
 import { Plus, Filter, Download } from "lucide-react";
 import { AddClassForm } from "@/components/forms/AddClassForm";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { arSA } from 'date-fns/locale/ar-SA';
-import type { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import type { Calendar } from 'react-big-calendar';
 
 const locales = {
   'ar-SA': arSA,
