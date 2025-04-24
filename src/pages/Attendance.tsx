@@ -1,79 +1,55 @@
 
 import React, { useState } from "react";
-import { Search, Download, Calendar, Check, X } from "lucide-react";
+import { Search, Filter, Download, Check, X } from "lucide-react";
 
-// Mock data for attendance
+// Mock attendance data
 const ATTENDANCE_DATA = [
   {
     id: 1,
-    name: "أحمد محمد",
+    studentName: "أحمد محمد",
     class: "الصف التاسع (أ)",
-    date: "2024-04-23",
-    status: "present",
-    arrivalTime: "07:45",
-    note: ""
+    date: "2024-04-24",
+    status: "حاضر",
+    time: "07:45 ص",
+    notes: "حضور مبكر"
   },
   {
     id: 2,
-    name: "سارة خالد",
+    studentName: "سارة خالد",
     class: "الصف العاشر (ب)",
-    date: "2024-04-23",
-    status: "absent",
-    arrivalTime: "-",
-    note: "إجازة مرضية"
+    date: "2024-04-24",
+    status: "غائب",
+    time: "-",
+    notes: "إجازة مرضية"
   },
   {
     id: 3,
-    name: "عمر أحمد",
+    studentName: "عمر أحمد",
     class: "الصف الثامن (ج)",
-    date: "2024-04-23",
-    status: "late",
-    arrivalTime: "08:15",
-    note: "تأخر 15 دقيقة"
+    date: "2024-04-24",
+    status: "حاضر",
+    time: "08:00 ص",
+    notes: ""
   }
 ];
 
+const getStatusColor = (status: string) => {
+  return status === "حاضر" 
+    ? "text-green-500 bg-green-50" 
+    : "text-red-500 bg-red-50";
+};
+
 export default function Attendance() {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedClass, setSelectedClass] = useState("الكل");
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "present":
-        return "text-green-500 bg-green-50";
-      case "absent":
-        return "text-red-500 bg-red-50";
-      case "late":
-        return "text-yellow-500 bg-yellow-50";
-      default:
-        return "";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "present":
-        return "حاضر";
-      case "absent":
-        return "غائب";
-      case "late":
-        return "متأخر";
-      default:
-        return "";
-    }
-  };
-
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  
   return (
     <div className="animate-fade-in space-y-6" dir="rtl">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">سجل الحضور والغياب</h1>
-          <p className="text-muted-foreground">متابعة حضور الطلاب</p>
+          <h1 className="text-3xl font-bold">سجل الحضور</h1>
+          <p className="text-muted-foreground">متابعة حضور وغياب الطلاب</p>
         </div>
-        <button className="flex items-center gap-2 border rounded-md py-2 px-4 hover:bg-accent">
-          <Calendar size={16} />
-          23 أبريل 2024
-        </button>
       </div>
 
       {/* Filters */}
@@ -86,8 +62,6 @@ export default function Attendance() {
                 type="search"
                 placeholder="البحث عن طالب..."
                 className="w-full pl-10 pr-4 py-2 rounded-md border bg-background"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -102,6 +76,15 @@ export default function Attendance() {
               <option value="الصف العاشر (ب)">الصف العاشر (ب)</option>
               <option value="الصف الثامن (ج)">الصف الثامن (ج)</option>
             </select>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="py-2 px-3 rounded-md border bg-background"
+            />
+            <button className="flex items-center gap-2 border rounded-md py-2 px-3 hover:bg-accent">
+              <Filter size={16} /> تصفية
+            </button>
             <button className="flex items-center gap-2 border rounded-md py-2 px-3 hover:bg-accent">
               <Download size={16} /> تصدير التقرير
             </button>
@@ -117,6 +100,7 @@ export default function Attendance() {
               <tr className="border-b">
                 <th className="text-right p-4">الطالب</th>
                 <th className="text-right p-4">الفصل</th>
+                <th className="text-right p-4">التاريخ</th>
                 <th className="text-right p-4">الحالة</th>
                 <th className="text-right p-4">وقت الحضور</th>
                 <th className="text-right p-4">ملاحظات</th>
@@ -124,24 +108,31 @@ export default function Attendance() {
               </tr>
             </thead>
             <tbody>
-              {ATTENDANCE_DATA.map((student) => (
-                <tr key={student.id} className="border-b hover:bg-muted/50">
-                  <td className="p-4">{student.name}</td>
-                  <td className="p-4">{student.class}</td>
+              {ATTENDANCE_DATA.map((record) => (
+                <tr key={record.id} className="border-b hover:bg-muted/50">
+                  <td className="p-4">{record.studentName}</td>
+                  <td className="p-4">{record.class}</td>
+                  <td className="p-4">{record.date}</td>
                   <td className="p-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
-                      {getStatusText(student.status)}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
+                      {record.status}
                     </span>
                   </td>
-                  <td className="p-4">{student.arrivalTime}</td>
-                  <td className="p-4">{student.note}</td>
+                  <td className="p-4">{record.time}</td>
+                  <td className="p-4">{record.notes || "-"}</td>
                   <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <button className="p-1 rounded-full hover:bg-green-100 text-green-600">
-                        <Check size={18} />
+                    <div className="flex gap-2">
+                      <button 
+                        className="p-1 rounded-md hover:bg-green-100 text-green-600"
+                        title="تسجيل حضور"
+                      >
+                        <Check size={16} />
                       </button>
-                      <button className="p-1 rounded-full hover:bg-red-100 text-red-600">
-                        <X size={18} />
+                      <button 
+                        className="p-1 rounded-md hover:bg-red-100 text-red-600"
+                        title="تسجيل غياب"
+                      >
+                        <X size={16} />
                       </button>
                     </div>
                   </td>
