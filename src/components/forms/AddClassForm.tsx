@@ -9,12 +9,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const classSchema = z.object({
-  title: z.string().min(3, "عنوان الحصة مطلوب"),
-  teacherId: z.string().min(1, "يرجى اختيار المدرس"),
-  grade: z.string().min(1, "يرجى اختيار الصف"),
-  startTime: z.string().min(1, "وقت البداية مطلوب"),
-  endTime: z.string().min(1, "وقت النهاية مطلوب"),
-  date: z.string().min(1, "التاريخ مطلوب"),
+  title: z.string().min(3, "عنوان الحصة يجب أن يكون 3 أحرف على الأقل"),
+  teacher: z.string().min(3, "اسم المدرس مطلوب"),
+  subject: z.string().min(2, "المادة مطلوبة"),
+  time: z.string().min(1, "وقت الحصة مطلوب"),
+  duration: z.string().min(1, "مدة الحصة مطلوبة"),
+  room: z.string().min(1, "رقم القاعة مطلوب"),
 });
 
 type ClassFormData = z.infer<typeof classSchema>;
@@ -29,11 +29,11 @@ export function AddClassForm({ open, onOpenChange }: AddClassFormProps) {
     resolver: zodResolver(classSchema),
     defaultValues: {
       title: "",
-      teacherId: "",
-      grade: "",
-      startTime: "",
-      endTime: "",
-      date: "",
+      teacher: "",
+      subject: "",
+      time: "",
+      duration: "",
+      room: "",
     },
   });
 
@@ -66,20 +66,12 @@ export function AddClassForm({ open, onOpenChange }: AddClassFormProps) {
             />
             <FormField
               control={form.control}
-              name="teacherId"
+              name="teacher"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>المدرس</FormLabel>
                   <FormControl>
-                    <select 
-                      className="w-full p-2 border rounded-md"
-                      {...field}
-                    >
-                      <option value="">اختر المدرس</option>
-                      <option value="1">أحمد محمود - رياضيات</option>
-                      <option value="2">سارة العلي - لغة عربية</option>
-                      <option value="3">محمد الخالدي - علوم</option>
-                    </select>
+                    <Input placeholder="اختر المدرس" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -87,20 +79,12 @@ export function AddClassForm({ open, onOpenChange }: AddClassFormProps) {
             />
             <FormField
               control={form.control}
-              name="grade"
+              name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>الصف</FormLabel>
+                  <FormLabel>المادة</FormLabel>
                   <FormControl>
-                    <select 
-                      className="w-full p-2 border rounded-md"
-                      {...field}
-                    >
-                      <option value="">اختر الصف</option>
-                      <option value="الصف التاسع (أ)">الصف التاسع (أ)</option>
-                      <option value="الصف العاشر (ب)">الصف العاشر (ب)</option>
-                      <option value="الصف الثامن (ج)">الصف الثامن (ج)</option>
-                    </select>
+                    <Input placeholder="ادخل المادة" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,45 +92,43 @@ export function AddClassForm({ open, onOpenChange }: AddClassFormProps) {
             />
             <FormField
               control={form.control}
-              name="date"
+              name="time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>التاريخ</FormLabel>
+                  <FormLabel>وقت الحصة</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="time" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>وقت البداية</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="endTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>وقت النهاية</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>مدة الحصة</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="المدة بالدقائق" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="room"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>القاعة</FormLabel>
+                  <FormControl>
+                    <Input placeholder="رقم القاعة" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="flex justify-end space-x-2">
               <Button type="submit">إضافة الحصة</Button>
             </div>

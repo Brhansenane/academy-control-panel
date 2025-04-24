@@ -1,14 +1,12 @@
+
 import React, { useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as BigCalendar } from "react-big-calendar";
 import { Plus, Filter, Download } from "lucide-react";
 import { AddClassForm } from "@/components/forms/AddClassForm";
-import { dateFnsLocalizer } from "react-big-calendar";
-import { format } from "date-fns";
-import { parse } from "date-fns";
-import { startOfWeek } from "date-fns";
-import { getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { arSA } from 'date-fns/locale/ar-SA';
+import type { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 
 const locales = {
   'ar-SA': arSA,
@@ -48,7 +46,7 @@ const events = [
 ];
 
 export default function Schedule() {
-  const [view, setView] = useState("week");
+  const [view, setView] = useState<"month" | "week" | "day">("week");
   const [showAddForm, setShowAddForm] = useState(false);
 
   return (
@@ -81,7 +79,7 @@ export default function Schedule() {
           <select 
             className="py-2 px-3 rounded-md border bg-background"
             value={view}
-            onChange={(e) => setView(e.target.value)}
+            onChange={(e) => setView(e.target.value as "month" | "week" | "day")}
           >
             <option value="day">اليوم</option>
             <option value="week">الأسبوع</option>
@@ -91,14 +89,14 @@ export default function Schedule() {
       </div>
 
       <div className="glass-card p-6" style={{ height: "700px" }}>
-        <Calendar
+        <BigCalendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
           culture="ar-SA"
-          view={view as any}
-          onView={(newView) => setView(newView)}
+          view={view}
+          onView={(newView) => setView(newView as "month" | "week" | "day")}
           messages={{
             week: 'الأسبوع',
             day: 'اليوم',
