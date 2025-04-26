@@ -83,11 +83,13 @@ export default function Settings() {
                 <Label>الوضع المظلم</Label>
                 <p className="text-sm text-muted-foreground">تبديل مظهر التطبيق</p>
               </div>
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-                icon={theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-              />
+              <div className="flex items-center gap-2">
+                {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                <Switch
+                  checked={theme === "dark"}
+                  onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
