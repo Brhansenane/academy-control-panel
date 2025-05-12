@@ -3,7 +3,7 @@
 ## Project info
 
 ## live view 
-https://scholmage.vercel.app/settings
+https://scholmage.vercel.app
 
 
 There are several ways of editing your application.
