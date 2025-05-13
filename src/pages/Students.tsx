@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   ChevronRight, 
@@ -9,110 +10,45 @@ import {
   Plus, 
   Search, 
   Trash2, 
-  User 
+  User,
+  Loader2
 } from "lucide-react";
 import { AddStudentForm } from "@/components/forms/AddStudentForm";
+import { supabase } from "@/integrations/supabase/client";
+import { Student } from "@/types/database";
+import { toast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-// Mock data for students
-const STUDENTS_DATA = [
-  {
-    id: 1,
-    name: "أحمد محمد خالد",
-    grade: "الصف التاسع (أ)",
-    profileImage: "https://i.pravatar.cc/150?img=1",
-    attendance: "95%",
-    overallGrade: "ممتاز",
-    parentName: "محمد خالد",
-    parentPhone: "0599123456",
-    dateOfBirth: "15/05/2008",
-    address: "عمان، الأردن - شارع الملك عبدالله",
-    enrollmentDate: "01/09/2019",
-    gender: "ذكر"
-  },
-  {
-    id: 2,
-    name: "سارة عبد الله الأحمد",
-    grade: "الصف العاشر (ب)",
-    profileImage: "https://i.pravatar.cc/150?img=5",
-    attendance: "92%",
-    overallGrade: "جيد جداً",
-    parentName: "عبد الله الأحمد",
-    parentPhone: "0599789123",
-    dateOfBirth: "22/03/2007",
-    address: "عمان، الأردن - حي الجبيهة",
-    enrollmentDate: "01/09/2018",
-    gender: "أنثى"
-  },
-  {
-    id: 3,
-    name: "علي يوسف الحسن",
-    grade: "الصف التاسع (أ)",
-    profileImage: "https://i.pravatar.cc/150?img=3",
-    attendance: "87%",
-    overallGrade: "جيد",
-    parentName: "يوسف الحسن",
-    parentPhone: "0599456789",
-    dateOfBirth: "10/11/2008",
-    address: "عمان، الأردن - شارع الجامعة",
-    enrollmentDate: "01/09/2019",
-    gender: "ذكر"
-  },
-  {
-    id: 4,
-    name: "نور محمد الخطيب",
-    grade: "الصف الثامن (ج)",
-    profileImage: "https://i.pravatar.cc/150?img=9",
-    attendance: "98%",
-    overallGrade: "ممتاز",
-    parentName: "محمد الخطيب",
-    parentPhone: "0599987654",
-    dateOfBirth: "05/08/2009",
-    address: "عمان، الأردن - حي تلاع العلي",
-    enrollmentDate: "01/09/2020",
-    gender: "أنثى"
-  },
-  {
-    id: 5,
-    name: "عمر خالد العلي",
-    grade: "الصف العاشر (أ)",
-    profileImage: "https://i.pravatar.cc/150?img=11",
-    attendance: "90%",
-    overallGrade: "جيد جداً",
-    parentName: "خالد العلي",
-    parentPhone: "0599765123",
-    dateOfBirth: "18/04/2007",
-    address: "عمان، الأردن - شارع المدينة المنورة",
-    enrollmentDate: "01/09/2018",
-    gender: "ذكر"
-  }
-];
-
-// Types
-interface Student {
-  id: number;
-  name: string;
-  grade: string;
-  profileImage: string;
-  attendance: string;
-  overallGrade: string;
-  parentName: string;
-  parentPhone: string;
-  dateOfBirth: string;
-  address: string;
-  enrollmentDate: string;
-  gender: string;
-}
-
-// Component for student card
-const StudentCard = ({ student }: { student: Student }) => {
+// مكون بطاقة الطالب
+const StudentCard = ({ student, onEdit, onDelete }: { 
+  student: Student & { profile?: { first_name: string; last_name: string; avatar_url?: string } }; 
+  onEdit: () => void;
+  onDelete: () => void;
+}) => {
   const [showActions, setShowActions] = useState(false);
   
-  const getGradeColor = (grade: string) => {
+  const getGradeColor = (grade: string | null) => {
+    if (!grade) return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
     if (grade.includes('ممتاز')) return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
     if (grade.includes('جيد جداً')) return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
     if (grade.includes('جيد')) return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
     return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400";
   };
+
+  const studentName = student.profile ? 
+    `${student.profile.first_name} ${student.profile.last_name}` : 
+    "طالب";
+
+  const studentImage = student.profile?.avatar_url || "https://i.pravatar.cc/150?img=1";
 
   return (
     <div className="glass-card card-hover p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
@@ -120,15 +56,15 @@ const StudentCard = ({ student }: { student: Student }) => {
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-full overflow-hidden border">
           <img 
-            src={student.profileImage} 
-            alt={student.name} 
+            src={studentImage} 
+            alt={studentName} 
             className="h-full w-full object-cover"
           />
         </div>
         <div>
           <div className="flex items-center">
-            <h3 className="font-medium">{student.name}</h3>
-            <span className="text-xs text-muted-foreground mr-2">(#{student.id})</span>
+            <h3 className="font-medium">{studentName}</h3>
+            <span className="text-xs text-muted-foreground mr-2">(#{student.id.substring(0, 4)})</span>
           </div>
           <p className="text-sm text-muted-foreground">{student.grade}</p>
         </div>
@@ -138,17 +74,17 @@ const StudentCard = ({ student }: { student: Student }) => {
       <div className="hidden md:flex items-center gap-6">
         <div className="text-center">
           <p className="text-xs text-muted-foreground">الحضور</p>
-          <p className="font-medium">{student.attendance}</p>
+          <p className="font-medium">{student.attendance_rate ? `${student.attendance_rate}%` : "غير متوفر"}</p>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">التقييم</p>
-          <div className={`px-2 py-0.5 rounded-full text-xs text-center mt-1 ${getGradeColor(student.overallGrade)}`}>
-            {student.overallGrade}
+          <div className={`px-2 py-0.5 rounded-full text-xs text-center mt-1 ${getGradeColor(student.overall_grade)}`}>
+            {student.overall_grade || "غير متوفر"}
           </div>
         </div>
         <div>
           <p className="text-xs text-muted-foreground">ولي الأمر</p>
-          <p className="font-medium text-sm">{student.parentName}</p>
+          <p className="font-medium text-sm">{student.parent_name}</p>
         </div>
       </div>
       
@@ -172,13 +108,25 @@ const StudentCard = ({ student }: { student: Student }) => {
           
           {showActions && (
             <div className="absolute left-0 top-full mt-1 w-48 py-2 bg-card border rounded-md shadow-lg z-10">
-              <button className="flex items-center w-full px-3 py-2 text-sm hover:bg-accent">
+              <button 
+                onClick={() => {
+                  onEdit();
+                  setShowActions(false);
+                }} 
+                className="flex items-center w-full px-3 py-2 text-sm hover:bg-accent"
+              >
                 <Edit size={16} className="mr-2" /> تعديل البيانات
               </button>
               <button className="flex items-center w-full px-3 py-2 text-sm hover:bg-accent">
                 <FileText size={16} className="mr-2" /> تقرير مفصل
               </button>
-              <button className="flex items-center w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10">
+              <button 
+                onClick={() => {
+                  onDelete();
+                  setShowActions(false);
+                }} 
+                className="flex items-center w-full px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+              >
                 <Trash2 size={16} className="mr-2" /> حذف الطالب
               </button>
             </div>
@@ -193,17 +141,106 @@ export function Students() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("الكل");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
-  // Filter students based on search and filter criteria
-  const filteredStudents = STUDENTS_DATA.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const [students, setStudents] = useState<(Student & { profile?: { first_name: string; last_name: string; avatar_url?: string } })[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
+
+  // استرجاع بيانات الطلاب من قاعدة البيانات
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .select(`
+          *,
+          profile: user_id (
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `);
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setStudents(data);
+      }
+    } catch (error: any) {
+      toast({
+        title: "خطأ في استرجاع بيانات الطلاب",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // حذف طالب من قاعدة البيانات
+  const deleteStudent = async () => {
+    if (!currentStudent) return;
+    
+    try {
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', currentStudent.id);
+        
+      if (error) throw error;
+      
+      // تحديث قائمة الطلاب بعد الحذف
+      setStudents(prev => prev.filter(student => student.id !== currentStudent.id));
+      
+      toast({
+        title: "تم حذف الطالب بنجاح",
+      });
+    } catch (error: any) {
+      toast({
+        title: "خطأ في حذف الطالب",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setShowDeleteDialog(false);
+      setCurrentStudent(null);
+    }
+  };
+
+  // استرجاع بيانات الطلاب عند تحميل الصفحة
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  // فلترة الطلاب بناءً على البحث والفلتر
+  const filteredStudents = students.filter(student => {
+    const profileName = student.profile ? `${student.profile.first_name} ${student.profile.last_name}`.toLowerCase() : "";
+    const matchesSearch = profileName.includes(searchTerm.toLowerCase()) || 
                           student.id.toString().includes(searchTerm);
     const matchesGrade = selectedGrade === "الكل" || student.grade.includes(selectedGrade);
     return matchesSearch && matchesGrade;
   });
   
-  // Grade options
-  const gradeOptions = ["الكل", "الصف الثامن", "الصف التاسع", "الصف العاش��"];
+  // خيارات الصفوف
+  const gradeOptions = ["الكل", "الصف الثامن", "الصف التاسع", "الصف العاشر"];
+
+  // التعامل مع تحديث الطالب
+  const handleStudentUpdate = (updatedStudent: Student) => {
+    setStudents(prev => prev.map(student => 
+      student.id === updatedStudent.id ? {...student, ...updatedStudent} : student
+    ));
+    setShowEditForm(false);
+    setCurrentStudent(null);
+  };
+
+  // التعامل مع إضافة طالب جديد
+  const handleStudentAdd = (newStudent: Student) => {
+    setStudents(prev => [...prev, newStudent]);
+  };
 
   return (
     <div className="animate-fade-in" dir="rtl">
@@ -220,7 +257,38 @@ export function Students() {
         </button>
       </div>
       
-      <AddStudentForm open={showAddForm} onOpenChange={setShowAddForm} />
+      <AddStudentForm 
+        open={showAddForm} 
+        onOpenChange={setShowAddForm} 
+        onSuccess={handleStudentAdd}
+      />
+      
+      {currentStudent && (
+        <AddStudentForm 
+          open={showEditForm} 
+          onOpenChange={setShowEditForm}
+          student={currentStudent}
+          onSuccess={handleStudentUpdate}
+        />
+      )}
+      
+      {/* Dialog تأكيد الحذف */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>هل أنت متأكد من حذف هذا الطالب؟</AlertDialogTitle>
+            <AlertDialogDescription>
+              هذا الإجراء لا يمكن التراجع عنه. سيتم حذف جميع بيانات الطالب نهائيًا.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-row gap-2 justify-end">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteStudent} className="bg-destructive hover:bg-destructive/90">
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       {/* Filters */}
       <div className="glass-card p-4 mb-6">
@@ -256,36 +324,53 @@ export function Students() {
         </div>
       </div>
       
-      {/* Student list */}
-      <div className="space-y-4">
-        {filteredStudents.length > 0 ? (
-          filteredStudents.map(student => (
-            <StudentCard key={student.id} student={student} />
-          ))
-        ) : (
-          <div className="glass-card p-8 text-center">
-            <div className="flex flex-col items-center justify-center">
-              <User className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">لم يتم العثور على طلاب</h3>
-              <p className="text-muted-foreground mt-1">لا توجد نتائج مطابقة لمعايير البحث</p>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* جاري التحميل */}
+      {loading && (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="mr-2">جاري تحميل بيانات الطلاب...</span>
+        </div>
+      )}
       
-      {/* Pagination */}
+      {/* قائمة الطلاب */}
+      {!loading && (
+        <div className="space-y-4">
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map(student => (
+              <StudentCard 
+                key={student.id} 
+                student={student} 
+                onEdit={() => {
+                  setCurrentStudent(student);
+                  setShowEditForm(true);
+                }}
+                onDelete={() => {
+                  setCurrentStudent(student);
+                  setShowDeleteDialog(true);
+                }}
+              />
+            ))
+          ) : (
+            <div className="glass-card p-8 text-center">
+              <div className="flex flex-col items-center justify-center">
+                <User className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">لم يتم العثور على طلاب</h3>
+                <p className="text-muted-foreground mt-1">لا توجد نتائج مطابقة لمعايير البحث</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* ترقيم الصفحات */}
       {filteredStudents.length > 0 && (
         <div className="flex items-center justify-between mt-8 border-t pt-4">
-          <p className="text-sm text-muted-foreground">عرض 5 من 120 طالب</p>
+          <p className="text-sm text-muted-foreground">عرض {filteredStudents.length} من {students.length} طالب</p>
           <div className="flex items-center gap-2">
             <button className="px-3 py-2 border rounded-md hover:bg-accent disabled:opacity-50 disabled:hover:bg-transparent" disabled>
               السابق
             </button>
             <button className="px-3 py-2 bg-primary text-primary-foreground rounded-md">1</button>
-            <button className="px-3 py-2 border rounded-md hover:bg-accent">2</button>
-            <button className="px-3 py-2 border rounded-md hover:bg-accent">3</button>
-            <span className="px-2">...</span>
-            <button className="px-3 py-2 border rounded-md hover:bg-accent">12</button>
             <button className="px-3 py-2 border rounded-md hover:bg-accent">
               التالي
             </button>

@@ -1,16 +1,18 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Auth() {
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, loading } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   
   const [loginData, setLoginData] = useState({
@@ -27,9 +29,12 @@ export default function Auth() {
     role: "teacher" as "teacher" | "admin" | "student"
   });
 
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
+  // إذا كان المستخدم مسجل دخوله بالفعل، انتقل إلى لوحة القيادة
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,9 +55,29 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!loginData.email || !loginData.password) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إدخال البريد الإلكتروني وكلمة المرور",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await signIn(loginData.email, loginData.password);
+      toast({
+        title: "تم تسجيل الدخول بنجاح",
+        description: "مرحباً بك في نظام إدارة المدرسة"
+      });
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "فشل تسجيل الدخول",
+        description: error.message || "حدث خطأ أثناء تسجيل الدخول",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -60,8 +85,23 @@ export default function Auth() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // التحقق من البيانات
+    if (!registerData.firstName || !registerData.lastName || !registerData.email || !registerData.password) {
+      toast({
+        title: "خطأ",
+        description: "الرجاء إكمال جميع الحقول المطلوبة",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (registerData.password !== registerData.confirmPassword) {
-      alert("كلمات المرور غير متطابقة");
+      toast({
+        title: "خطأ",
+        description: "كلمات المرور غير متطابقة",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -74,6 +114,16 @@ export default function Auth() {
         registerData.lastName,
         registerData.role
       );
+      toast({
+        title: "تم إنشاء الحساب بنجاح",
+        description: "يرجى تسجيل الدخول للمتابعة"
+      });
+    } catch (error: any) {
+      toast({
+        title: "فشل إنشاء الحساب",
+        description: error.message || "حدث خطأ أثناء إنشاء الحساب",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +138,7 @@ export default function Auth() {
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="login">
+          <Tabs defaultValue="login" dir="rtl">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">تسجيل الدخول</TabsTrigger>
               <TabsTrigger value="register">حساب جديد</TabsTrigger>

@@ -19,6 +19,24 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// دالة لتنظيف حالة المصادقة
+const cleanupAuthState = () => {
+  // إزالة الرموز القياسية للمصادقة
+  localStorage.removeItem('supabase.auth.token');
+  // إزالة جميع مفاتيح Supabase من localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  // إزالة من sessionStorage إذا كانت مستخدمة
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -27,7 +45,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // إعداد مستمع لتغييرات حالة المصادقة أولاً
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
@@ -43,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    // Check for existing session
+    // التحقق من وجود جلسة
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -86,6 +104,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     role: 'teacher' | 'admin' | 'student'
   ) => {
     try {
+      // تنظيف حالة المصادقة أولاً
+      cleanupAuthState();
+      
+      // محاولة تسجيل خروج عام
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // استمر حتى لو فشل هذا
+      }
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -111,8 +139,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         title: "تم إنشاء الحساب بنجاح",
         description: "يرجى تسجيل الدخول للمتابعة",
       });
-      
-      navigate('/auth');
     } catch (error: any) {
       toast({
         title: "خطأ غير متوقع",
@@ -124,6 +150,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // تنظيف حالة المصادقة أولاً
+      cleanupAuthState();
+      
+      // محاولة تسجيل خروج عام
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // استمر حتى لو فشل هذا
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -143,7 +179,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: `مرحباً بعودتك!`
       });
       
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast({
         title: "خطأ غير متوقع",
@@ -155,8 +191,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate('/auth');
+      // تنظيف حالة المصادقة أولاً
+      cleanupAuthState();
+      
+      // محاولة تسجيل خروج عام
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // تجاهل الأخطاء
+      }
+      
+      // إعادة تحميل الصفحة للحصول على حالة نظيفة
+      window.location.href = '/auth';
+      
       toast({
         title: "تم تسجيل الخروج بنجاح",
       });
@@ -193,7 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // تحديث البيانات محليًا
+      // تحديث البيانات محلياً
       setProfile(prev => prev ? { ...prev, ...data } : null);
       
       toast({
