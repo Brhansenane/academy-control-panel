@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -67,11 +66,7 @@ export default function Auth() {
     setIsLoading(true);
     try {
       await signIn(loginData.email, loginData.password);
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: "مرحباً بك في نظام إدارة المدرسة"
-      });
-      navigate("/dashboard");
+      // تم تسجيل الدخول بنجاح، سيتم التعامل مع التنقل والإشعارات في دالة signIn
     } catch (error: any) {
       toast({
         title: "فشل تسجيل الدخول",

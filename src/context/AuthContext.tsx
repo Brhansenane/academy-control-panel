@@ -168,7 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         toast({
           title: "فشل تسجيل الدخول",
-          description: error.message,
+          description: "بيانات الدخول غير صحيحة، يرجى التحقق وإعادة المحاولة",
           variant: "destructive"
         });
         return;
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       toast({
         title: "تم تسجيل الدخول بنجاح",
-        description: `مرحباً بعودتك!`
+        description: `مرحباً بعودتك ${data.user?.user_metadata?.first_name || ''}!`
       });
       
       navigate('/dashboard');
